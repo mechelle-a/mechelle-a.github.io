@@ -5,7 +5,7 @@ import { Github, Linkedin, Mail, ExternalLink, Menu, X } from 'lucide-react';
 import './portfolio.css';
 
 // ==================== CONSTANTS ====================
-const NAVIGATION_ITEMS = ['home', 'about', 'skills', 'projects', 'contact'] as const;
+const NAVIGATION_ITEMS = ['home', 'about', 'skills', 'projects', 'linkedin', 'contact'] as const;
 
 const SKILLS_DATA = [
   { category: 'Languages', items: ['JavaScript', 'TypeScript', 'Python', 'Java', 'C#', 'PHP', 'SQL'] },
@@ -30,6 +30,14 @@ type Section = typeof NAVIGATION_ITEMS[number];
 const SectionTransition = React.memo(({ variant = 'light' }: { variant?: 'light' | 'dark' }) => {
   const primaryColor = variant === 'light' ? '#7A1E35' : '#932841';
   const secondaryColor = variant === 'light' ? '#932841' : '#A86373';
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    setIsMobile(window.innerWidth <= 768);
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   return (
     <div className="section-transition scroll-animate scroll-animate-fast">
@@ -41,9 +49,11 @@ const SectionTransition = React.memo(({ variant = 'light' }: { variant?: 'light'
           <path d="M0,70 Q300,30 600,70 T1200,70 L1200,120 L0,120 Z" fill={secondaryColor} />
         </svg>
       </div>
-      <div className="transition-particles">
-        {[...Array(6)].map((_, i) => <div key={i} className="transition-particle" />)}
-      </div>
+      {!isMobile && (
+        <div className="transition-particles">
+          {[...Array(6)].map((_, i) => <div key={i} className="transition-particle" />)}
+        </div>
+      )}
       <div className="transition-gradient-overlay" />
     </div>
   );
@@ -207,6 +217,11 @@ export default function Portfolio() {
   }, []);
 
   const scrollToSection = useCallback((id: string) => {
+    if (id === 'linkedin') {
+      handleExternalLink('https://www.linkedin.com/in/mechelle-joe-anand-5406722b3/', 'LinkedIn');
+      setIsMenuOpen(false);
+      return;
+    }
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     setIsMenuOpen(false);
   }, []);
@@ -241,6 +256,7 @@ export default function Portfolio() {
                     key={item} 
                     onClick={() => scrollToSection(item)} 
                     className={`nav-link ${activeSection === item ? 'active' : ''}`}
+                    {...(item === 'linkedin' ? { 'data-external': 'true' } : {})}
                   >
                     {item}<span className="nav-link-underline" />
                   </button>
@@ -254,7 +270,7 @@ export default function Portfolio() {
 
             {isMenuOpen && (
               <div className="nav-mobile">
-                {NAVIGATION_ITEMS.slice(0, -1).map((item) => (
+                {NAVIGATION_ITEMS.filter(item => item !== 'contact').map((item) => (
                   <button key={item} onClick={() => scrollToSection(item)} className="nav-mobile-link">
                     {item}
                   </button>
@@ -304,12 +320,12 @@ export default function Portfolio() {
               <div className="about-left-column">
                 <div className="profile-image-container">
                   <div className="profile-image-wrapper scroll-animate">
-                    <img src="/profile.jpg" alt="Mechelle Joe Anand" className="profile-image" />
+                    <img src="/profile2.jpg" alt="Mechelle Joe Anand" className="profile-image" />
                     <div className="profile-image-overlay"></div>
                   </div>
                 </div>
                 
-                <p className="scroll-animate">As a Software Developer driven by curiosity and a relentless pursuit of excellence, I approach every project as both a craft and a challenge. I see software development as a disciplined art, where elegant architecture meets innovative solutions to solve real-world problems.</p>
+                <p className="scroll-animate" id="para1">As a Software Developer driven by curiosity and a relentless pursuit of excellence, I approach every project as both a craft and a challenge. I see software development as a disciplined art, where elegant architecture meets innovative solutions to solve real-world problems.</p>
                 <p className="scroll-animate">I combine deep technical expertise with a keen sense of design, ensuring that every system I build is robust, maintainable, and straightforward. To me, great software is timeless: it is resilient, scalable, and thoughtfully constructed, yet adaptable to the ever-evolving demands of technology.</p>
                 <p className="scroll-animate">I am passionate about creating solutions that are both powerful and meaningful, blending classical principles of structure and logic with the possibilities of modern innovation. <span className="deco">Every line of code I write reflects this vision — a commitment to quality, creativity, and enduring impact.</span></p>
               </div>
