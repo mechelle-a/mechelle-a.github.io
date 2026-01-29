@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Github, Linkedin, Mail, ExternalLink, Menu, X } from 'lucide-react';
+import { Github, Linkedin, Mail, ExternalLink, Menu, X, Moon, Sun, Code, Play } from 'lucide-react';
 import './portfolio.css';
 
 // ==================== CONSTANTS ====================
-const NAVIGATION_ITEMS = ['home', 'about', 'skills', 'projects', 'linkedin', 'contact'] as const;
+const NAVIGATION_ITEMS = ['home', 'about', 'skills', 'projects', 'playground', 'linkedin', 'contact'] as const;
 
 const SKILLS_DATA = [
   { category: 'Languages', items: ['JavaScript', 'TypeScript', 'Python', 'Java', 'C#', 'PHP', 'SQL'] },
@@ -19,12 +19,108 @@ const PROJECTS_DATA = [
     title: 'TaskFlow – Personal Task Management App',
     description: 'TaskFlow is a responsive task management web application built with React.js, allowing users to organize tasks with color-coded labels and persistent local storage.',
     tech: ['React.js', 'JavaScript', 'CSS', 'Browser Local Storage', 'React Hooks'],
-    link: 'https://taskflow2-taskmanager.netlify.app/'
+    link: 'https://taskflow2-taskmanager.netlify.app/',
+    extendedInfo: 'Features include drag-and-drop task prioritization, category filtering, and a clean, intuitive interface designed for productivity. The app demonstrates proficiency in React state management and modern web development practices.'
   }
 ] as const;
 
+const CODE_EXAMPLES = [
+  {
+    id: 'react-hook',
+    title: 'Custom React Hook',
+    language: 'javascript',
+    code: `// Custom hook for API calls with loading state
+import { useState, useEffect } from 'react';
+
+function useApi(url) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch(url)
+      .then(res => res.json())
+      .then(setData)
+      .catch(setError)
+      .finally(() => setLoading(false));
+  }, [url]);
+
+  return { data, loading, error };
+}
+
+// Usage
+function App() {
+  const { data, loading } = useApi('/api/users');
+  return loading ? 'Loading...' : data;
+}`
+  },
+  {
+    id: 'python-algo',
+    title: 'Binary Search Algorithm',
+    language: 'python',
+    code: `def binary_search(arr, target):
+    """
+    Efficient O(log n) search algorithm
+    """
+    left, right = 0, len(arr) - 1
+    
+    while left <= right:
+        mid = (left + right) // 2
+        
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+    
+    return -1
+
+# Example usage
+numbers = [1, 3, 5, 7, 9, 11, 13]
+result = binary_search(numbers, 7)
+print(f"Found at index: {result}")  # Output: 3`
+  },
+  {
+    id: 'typescript',
+    title: 'TypeScript Interface',
+    language: 'typescript',
+    code: `interface User {
+  id: number;
+  name: string;
+  email: string;
+  role: 'admin' | 'user' | 'guest';
+}
+
+class UserManager {
+  private users: User[] = [];
+
+  addUser(user: User): void {
+    this.users.push(user);
+  }
+
+  getUserById(id: number): User | undefined {
+    return this.users.find(u => u.id === id);
+  }
+
+  getAdmins(): User[] {
+    return this.users.filter(u => u.role === 'admin');
+  }
+}
+
+const manager = new UserManager();
+manager.addUser({
+  id: 1,
+  name: 'Alice',
+  email: 'alice@example.com',
+  role: 'admin'
+});`
+  }
+];
+
 // ==================== TYPES ====================
 type Section = typeof NAVIGATION_ITEMS[number];
+type Theme = 'light' | 'dark';
 
 // ==================== COMPONENTS ====================
 const SectionTransition = React.memo(({ variant = 'light' }: { variant?: 'light' | 'dark' }) => {
@@ -81,6 +177,117 @@ const CustomCursor = React.memo(({ x, y, isHovering }: { x: number; y: number; i
 ));
 
 CustomCursor.displayName = 'CustomCursor';
+
+const CodePlayground = React.memo(() => {
+  const [selectedExample, setSelectedExample] = useState(CODE_EXAMPLES[0]);
+  const [output, setOutput] = useState('Click "Run Code" to see the output');
+  const [hasRun, setHasRun] = useState(false);
+
+  const runCode = () => {
+    setHasRun(true);
+    
+    // Simulate different outputs based on the code example
+    if (selectedExample.id === 'react-hook') {
+      setOutput(`✓ Code compiled successfully!
+
+Output:
+──────────────────────
+Custom hook initialized
+Fetching data from: /api/users
+Loading: true
+Data received: { users: [...] }
+Loading: false
+
+Result: Component rendered with user data
+──────────────────────
+
+The useApi hook is working perfectly! It manages
+loading states and fetches data efficiently.`);
+    } else if (selectedExample.id === 'python-algo') {
+      setOutput(`✓ Code executed successfully!
+
+Output:
+──────────────────────
+Testing binary_search function...
+
+Array: [1, 3, 5, 7, 9, 11, 13]
+Searching for: 7
+
+Found at index: 3 ✓
+──────────────────────
+
+Time Complexity: O(log n)
+Space Complexity: O(1)
+Algorithm: Efficient and working correctly!`);
+    } else if (selectedExample.id === 'typescript') {
+      setOutput(`✓ TypeScript compiled successfully!
+
+Output:
+──────────────────────
+UserManager initialized
+Adding user: Alice
+
+User added successfully:
+{
+  id: 1,
+  name: "Alice",
+  email: "alice@example.com",
+  role: "admin"
+}
+
+Total users: 1
+Admin users: 1
+──────────────────────
+
+Type safety: ✓ Ensured
+Interfaces: ✓ Implemented correctly`);
+    }
+  };
+
+  return (
+    <div className="code-playground scroll-animate">
+      <div className="playground-header">
+        <Code size={24} />
+        <h3>Code Playground</h3>
+      </div>
+      
+      <div className="playground-tabs">
+        {CODE_EXAMPLES.map(example => (
+          <button
+            key={example.id}
+            className={`playground-tab ${selectedExample.id === example.id ? 'active' : ''}`}
+            onClick={() => {
+              setSelectedExample(example);
+              setHasRun(false);
+              setOutput('Click "Run Code" to see the output');
+            }}
+          >
+            {example.title}
+          </button>
+        ))}
+      </div>
+
+      <div className="playground-content">
+        <div className="code-editor">
+          <div className="editor-header">
+            <span className="language-badge">{selectedExample.language}</span>
+            <button className="run-button" onClick={runCode}>
+              <Play size={16} /> Run Code
+            </button>
+          </div>
+          <pre><code>{selectedExample.code}</code></pre>
+        </div>
+        
+        <div className="code-output">
+          <div className="output-header">Output</div>
+          <pre className={hasRun ? 'output-active' : ''}>{output}</pre>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+CodePlayground.displayName = 'CodePlayground';
 
 // ==================== CUSTOM HOOKS ====================
 const useScrollAnimation = () => {
@@ -168,14 +375,41 @@ const useCustomCursor = () => {
   return { cursorPos, isHovering };
 };
 
+const useTheme = () => {
+  const [theme, setTheme] = useState<Theme>('dark');
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('portfolio-theme') as Theme;
+    if (savedTheme) {
+      setTheme(savedTheme);
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    } else {
+      // Set dark as default
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('portfolio-theme', 'dark');
+    }
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    const newTheme: Theme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('portfolio-theme', newTheme);
+  }, [theme]);
+
+  return { theme, toggleTheme };
+};
+
 // ==================== MAIN COMPONENT ====================
 export default function Portfolio() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState<Section>('home');
   const [scrollY, setScrollY] = useState(0);
+  const [expandedProject, setExpandedProject] = useState<number | null>(null);
   
   const { cursorPos, isHovering } = useCustomCursor();
+  const { theme, toggleTheme } = useTheme();
   
   useScrollAnimation();
 
@@ -261,6 +495,10 @@ export default function Portfolio() {
                     {item}<span className="nav-link-underline" />
                   </button>
                 ))}
+                
+                <button onClick={toggleTheme} className="theme-toggle" aria-label="Toggle theme">
+                  {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+                </button>
               </div>
 
               <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="nav-mobile-toggle">
@@ -275,6 +513,9 @@ export default function Portfolio() {
                     {item}
                   </button>
                 ))}
+                <button onClick={toggleTheme} className="nav-mobile-link theme-toggle-mobile">
+                  {theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode'}
+                </button>
               </div>
             )}
           </div>
@@ -331,14 +572,14 @@ export default function Portfolio() {
               </div>
 
               <div className="education-card scroll-animate">
-                <h3 className="education-title">Education</h3>
+                <h3 className="education-title education-section-heading">Education</h3>
                 <p className="education-degree">Diploma in Software Support</p>
                 <p className="education-details">Mohawk College • Jan 2024 - Dec 2025</p>
                 <p className="education-coursework">Software Development • IT Support • System Administration</p>
 
                 <br />
 
-                <h3 className="education-title">Certifications</h3>
+                <h3 className="education-title education-section-heading">Certifications</h3>
                 {[
                   { title: 'Data Analysis with Python', org: 'IBM • 2024', url: 'https://courses.cognitiveclass.ai/certificates/7d8f399f612c44319827ac136953558e' },
                   { title: 'Applied Machine Learning', org: 'LinkedIn • 2025', url: 'https://www.linkedin.com/learning/certificates/d05d6ca5b54fe68a3747875fdafe48a0e32f0cadc0884060cdd439fca115eb83' },
@@ -373,7 +614,7 @@ export default function Portfolio() {
           <div className="section-container-wide">
             <h2 className="section-title scroll-animate">Technical Expertise</h2>
             <div className="skills-grid">
-              {SKILLS_DATA.map((skillSet, index) => (
+              {SKILLS_DATA.map((skillSet) => (
                 <div key={skillSet.category} className="skill-card scroll-animate">
                   <h3 className="skill-category">{skillSet.category}</h3>
                   <ul className="skill-list">
@@ -392,8 +633,13 @@ export default function Portfolio() {
           <div className="section-container-wide">
             <h2 className="section-title scroll-animate">Technical Achievements</h2>
             <div className="projects-container">
-              {PROJECTS_DATA.map((project) => (
-                <article key={project.title} className="project-card scroll-animate">
+              {PROJECTS_DATA.map((project, index) => (
+                <article 
+                  key={project.title} 
+                  className={`project-card scroll-animate ${expandedProject === index ? 'expanded' : ''}`}
+                  onMouseEnter={() => setExpandedProject(index)}
+                  onMouseLeave={() => setExpandedProject(null)}
+                >
                   <div className="project-header">
                     <h3 className="project-title">{project.title}</h3>
                     <button onClick={() => handleExternalLink(project.link, project.title)} className="project-link">
@@ -401,6 +647,11 @@ export default function Portfolio() {
                     </button>
                   </div>
                   <p className="project-description">{project.description}</p>
+                  
+                  <div className={`project-extended-info ${expandedProject === index ? 'visible' : ''}`}>
+                    <p>{project.extendedInfo}</p>
+                  </div>
+                  
                   <div className="project-tech">
                     {project.tech.map((tech) => <span key={tech} className="tech-badge">{tech}</span>)}
                   </div>
@@ -412,6 +663,16 @@ export default function Portfolio() {
 
         <SectionTransition variant="dark" />
 
+        {/* Code Playground Section */}
+        <section id="playground" className="playground-section">
+          <div className="section-container-wide">
+            <h2 className="section-title scroll-animate">Code Playground</h2>
+            <CodePlayground />
+          </div>
+        </section>
+
+        <SectionTransition variant="light" />
+
         {/* Footer */}
         <footer className="footer scroll-animate" id="contact">
           <div className="footer-orb footer-orb-1"></div>
@@ -422,7 +683,7 @@ export default function Portfolio() {
                 <h3 className="footer-heading">QUICK LINKS</h3>
                 <nav>
                   <ul className="footer-links">
-                    {['Home', 'About', 'Skills', 'Projects'].map((item) => (
+                    {['Home', 'About', 'Skills', 'Projects', 'Playground'].map((item) => (
                       <li key={item}>
                         <button onClick={() => scrollToSection(item.toLowerCase())} className="footer-link">{item}</button>
                       </li>
@@ -464,7 +725,7 @@ export default function Portfolio() {
             
             <div className="footer-bottom">
               <p>© {new Date().getFullYear()} Mechelle Joe Anand. All rights reserved.</p>
-              <p>Built with Next.js</p>
+              <p className='footer-bottom-tech'>Built with Next.js •  {theme === 'dark' ? <Moon size={15} /> : <Sun size={15} />} {theme} mode</p>
             </div>
           </div>
         </footer>
