@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Github, Linkedin, Mail, ExternalLink, Menu, X, Moon, Sun, Code, Play } from 'lucide-react';
+import { Github, Linkedin, Mail, ExternalLink, Menu, X, Moon, Sun } from 'lucide-react';
 import './portfolio.css';
 
 // ==================== CONSTANTS ====================
-const NAVIGATION_ITEMS = ['home', 'about', 'skills', 'projects', 'playground', 'linkedin', 'contact'] as const;
+const NAVIGATION_ITEMS = ['home', 'about', 'skills', 'projects', 'linkedin', 'contact'] as const;
 
 const SKILLS_DATA = [
   { category: 'Languages', items: ['JavaScript', 'TypeScript', 'Python', 'Java', 'C#', 'PHP', 'SQL'] },
@@ -23,100 +23,6 @@ const PROJECTS_DATA = [
     extendedInfo: 'Features include drag-and-drop task prioritization, category filtering, and a clean, intuitive interface designed for productivity. The app demonstrates proficiency in React state management and modern web development practices.'
   }
 ] as const;
-
-const CODE_EXAMPLES = [
-  {
-    id: 'react-hook',
-    title: 'Custom React Hook',
-    language: 'javascript',
-    code: `// Custom hook for API calls with loading state
-import { useState, useEffect } from 'react';
-
-function useApi(url) {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetch(url)
-      .then(res => res.json())
-      .then(setData)
-      .catch(setError)
-      .finally(() => setLoading(false));
-  }, [url]);
-
-  return { data, loading, error };
-}
-
-// Usage
-function App() {
-  const { data, loading } = useApi('/api/users');
-  return loading ? 'Loading...' : data;
-}`
-  },
-  {
-    id: 'python-algo',
-    title: 'Binary Search Algorithm',
-    language: 'python',
-    code: `def binary_search(arr, target):
-    """
-    Efficient O(log n) search algorithm
-    """
-    left, right = 0, len(arr) - 1
-    
-    while left <= right:
-        mid = (left + right) // 2
-        
-        if arr[mid] == target:
-            return mid
-        elif arr[mid] < target:
-            left = mid + 1
-        else:
-            right = mid - 1
-    
-    return -1
-
-# Example usage
-numbers = [1, 3, 5, 7, 9, 11, 13]
-result = binary_search(numbers, 7)
-print(f"Found at index: {result}")  # Output: 3`
-  },
-  {
-    id: 'typescript',
-    title: 'TypeScript Interface',
-    language: 'typescript',
-    code: `interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: 'admin' | 'user' | 'guest';
-}
-
-class UserManager {
-  private users: User[] = [];
-
-  addUser(user: User): void {
-    this.users.push(user);
-  }
-
-  getUserById(id: number): User | undefined {
-    return this.users.find(u => u.id === id);
-  }
-
-  getAdmins(): User[] {
-    return this.users.filter(u => u.role === 'admin');
-  }
-}
-
-const manager = new UserManager();
-manager.addUser({
-  id: 1,
-  name: 'Alice',
-  email: 'alice@example.com',
-  role: 'admin'
-});`
-  }
-];
 
 // ==================== TYPES ====================
 type Section = typeof NAVIGATION_ITEMS[number];
@@ -151,6 +57,13 @@ const SectionTransition = React.memo(({ variant = 'light' }: { variant?: 'light'
         </div>
       )}
       <div className="transition-gradient-overlay" />
+      
+      {/* Floating circles */}
+      <div className="transition-floating-elements">
+        {[...Array(20)].map((_, i) => (
+          <div key={`transition-dot-${i}`} className={`floating-dot floating-dot-${i + 1}`}></div>
+        ))}
+      </div>
     </div>
   );
 });
@@ -177,117 +90,6 @@ const CustomCursor = React.memo(({ x, y, isHovering }: { x: number; y: number; i
 ));
 
 CustomCursor.displayName = 'CustomCursor';
-
-const CodePlayground = React.memo(() => {
-  const [selectedExample, setSelectedExample] = useState(CODE_EXAMPLES[0]);
-  const [output, setOutput] = useState('Click "Run Code" to see the output');
-  const [hasRun, setHasRun] = useState(false);
-
-  const runCode = () => {
-    setHasRun(true);
-    
-    // Simulate different outputs based on the code example
-    if (selectedExample.id === 'react-hook') {
-      setOutput(`✓ Code compiled successfully!
-
-Output:
-──────────────────────
-Custom hook initialized
-Fetching data from: /api/users
-Loading: true
-Data received: { users: [...] }
-Loading: false
-
-Result: Component rendered with user data
-──────────────────────
-
-The useApi hook is working perfectly! It manages
-loading states and fetches data efficiently.`);
-    } else if (selectedExample.id === 'python-algo') {
-      setOutput(`✓ Code executed successfully!
-
-Output:
-──────────────────────
-Testing binary_search function...
-
-Array: [1, 3, 5, 7, 9, 11, 13]
-Searching for: 7
-
-Found at index: 3 ✓
-──────────────────────
-
-Time Complexity: O(log n)
-Space Complexity: O(1)
-Algorithm: Efficient and working correctly!`);
-    } else if (selectedExample.id === 'typescript') {
-      setOutput(`✓ TypeScript compiled successfully!
-
-Output:
-──────────────────────
-UserManager initialized
-Adding user: Alice
-
-User added successfully:
-{
-  id: 1,
-  name: "Alice",
-  email: "alice@example.com",
-  role: "admin"
-}
-
-Total users: 1
-Admin users: 1
-──────────────────────
-
-Type safety: ✓ Ensured
-Interfaces: ✓ Implemented correctly`);
-    }
-  };
-
-  return (
-    <div className="code-playground scroll-animate">
-      <div className="playground-header">
-        <Code size={24} />
-        <h3>Code Playground</h3>
-      </div>
-      
-      <div className="playground-tabs">
-        {CODE_EXAMPLES.map(example => (
-          <button
-            key={example.id}
-            className={`playground-tab ${selectedExample.id === example.id ? 'active' : ''}`}
-            onClick={() => {
-              setSelectedExample(example);
-              setHasRun(false);
-              setOutput('Click "Run Code" to see the output');
-            }}
-          >
-            {example.title}
-          </button>
-        ))}
-      </div>
-
-      <div className="playground-content">
-        <div className="code-editor">
-          <div className="editor-header">
-            <span className="language-badge">{selectedExample.language}</span>
-            <button className="run-button" onClick={runCode}>
-              <Play size={16} /> Run Code
-            </button>
-          </div>
-          <pre><code>{selectedExample.code}</code></pre>
-        </div>
-        
-        <div className="code-output">
-          <div className="output-header">Output</div>
-          <pre className={hasRun ? 'output-active' : ''}>{output}</pre>
-        </div>
-      </div>
-    </div>
-  );
-});
-
-CodePlayground.displayName = 'CodePlayground';
 
 // ==================== CUSTOM HOOKS ====================
 const useScrollAnimation = () => {
@@ -335,6 +137,24 @@ const useCustomCursor = () => {
   useEffect(() => {
     const hideCursor = () => {
       document.body.style.cursor = 'none';
+      document.documentElement.style.cursor = 'none';
+      // Hide cursor on all elements with multiple approaches
+      const styleSheet = document.createElement('style');
+      styleSheet.id = 'custom-cursor-override';
+      styleSheet.textContent = `
+        *, *::before, *::after, 
+        html, body, div, span, button, a, input, textarea, select {
+          cursor: none !important;
+        }
+        body {
+          cursor: none !important;
+        }
+      `;
+      document.head.appendChild(styleSheet);
+      
+      // Force cursor property on body and html
+      document.body.classList.add('custom-cursor-active');
+      document.documentElement.classList.add('custom-cursor-active');
     };
     
     hideCursor();
@@ -456,7 +276,17 @@ export default function Portfolio() {
       setIsMenuOpen(false);
       return;
     }
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    const element = document.getElementById(id);
+    if (element) {
+      const navHeight = 80; // Height of fixed navigation
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - navHeight;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
     setIsMenuOpen(false);
   }, []);
 
@@ -507,16 +337,29 @@ export default function Portfolio() {
             </div>
 
             {isMenuOpen && (
-              <div className="nav-mobile">
-                {NAVIGATION_ITEMS.filter(item => item !== 'contact').map((item) => (
-                  <button key={item} onClick={() => scrollToSection(item)} className="nav-mobile-link">
-                    {item}
+              <>
+                <div className="nav-mobile-overlay" onClick={() => setIsMenuOpen(false)}></div>
+                <div className="nav-mobile">
+                  {NAVIGATION_ITEMS.filter(item => item !== 'contact').map((item) => (
+                    <button key={item} onClick={() => scrollToSection(item)} className="nav-mobile-link">
+                      {item}
+                    </button>
+                  ))}
+                  <button onClick={toggleTheme} className="nav-mobile-link theme-toggle-mobile">
+                    {theme === 'light' ? (
+                      <>
+                        <Moon size={20} />
+                        <span>Dark Mode</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sun size={20} />
+                        <span>Light Mode</span>
+                      </>
+                    )}
                   </button>
-                ))}
-                <button onClick={toggleTheme} className="nav-mobile-link theme-toggle-mobile">
-                  {theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode'}
-                </button>
-              </div>
+                </div>
+              </>
             )}
           </div>
         </nav>
@@ -526,6 +369,19 @@ export default function Portfolio() {
           <div className="hero-bg">
             <div className="hero-orb hero-orb-1"></div>
             <div className="hero-orb hero-orb-2"></div>
+            
+            {/* Floating Elements */}
+            <div className="hero-floating-elements">
+              {/* Snowflake-like floating dots */}
+              {[...Array(20)].map((_, i) => (
+                <div key={`dot-${i}`} className={`floating-dot floating-dot-${i + 1}`}></div>
+              ))}
+              
+              {/* NEW: Geometric shapes */}
+              {[...Array(8)].map((_, i) => (
+                <div key={`shape-${i}`} className={`floating-shape floating-shape-${i + 1}`}></div>
+              ))}
+            </div>
           </div>
           
           <div className="hero-content">
@@ -566,7 +422,7 @@ export default function Portfolio() {
                   </div>
                 </div>
                 
-                <p className="scroll-animate" id="para1">As a Software Developer driven by curiosity and a relentless pursuit of excellence, I approach every project as both a craft and a challenge. I see software development as a disciplined art, where elegant architecture meets innovative solutions to solve real-world problems.</p>
+                <p className="scroll-animate">As a Software Developer driven by curiosity and a relentless pursuit of excellence, I approach every project as both a craft and a challenge. I see software development as a disciplined art, where elegant architecture meets innovative solutions to solve real-world problems.</p>
                 <p className="scroll-animate">I combine deep technical expertise with a keen sense of design, ensuring that every system I build is robust, maintainable, and straightforward. To me, great software is timeless: it is resilient, scalable, and thoughtfully constructed, yet adaptable to the ever-evolving demands of technology.</p>
                 <p className="scroll-animate">I am passionate about creating solutions that are both powerful and meaningful, blending classical principles of structure and logic with the possibilities of modern innovation. <span className="deco">Every line of code I write reflects this vision — a commitment to quality, creativity, and enduring impact.</span></p>
               </div>
@@ -661,29 +517,33 @@ export default function Portfolio() {
           </div>
         </section>
 
-        <SectionTransition variant="dark" />
-
-        {/* Code Playground Section */}
-        <section id="playground" className="playground-section">
-          <div className="section-container-wide">
-            <h2 className="section-title scroll-animate">Code Playground</h2>
-            <CodePlayground />
-          </div>
-        </section>
-
         <SectionTransition variant="light" />
 
         {/* Footer */}
         <footer className="footer scroll-animate" id="contact">
           <div className="footer-orb footer-orb-1"></div>
           <div className="footer-orb footer-orb-2"></div>
+          
+          {/* Floating Elements - Same as Hero */}
+          <div className="footer-floating-elements">
+            {/* Snowflake-like floating dots */}
+            {[...Array(20)].map((_, i) => (
+              <div key={`footer-dot-${i}`} className={`floating-dot floating-dot-${i + 1}`}></div>
+            ))}
+            
+            {/* Geometric shapes */}
+            {[...Array(8)].map((_, i) => (
+              <div key={`footer-shape-${i}`} className={`floating-shape floating-shape-${i + 1}`}></div>
+            ))}
+          </div>
+          
           <div className="footer-content">
             <div className="footer-grid">
               <div className="scroll-animate">
                 <h3 className="footer-heading">QUICK LINKS</h3>
                 <nav>
                   <ul className="footer-links">
-                    {['Home', 'About', 'Skills', 'Projects', 'Playground'].map((item) => (
+                    {['Home', 'About', 'Skills', 'Projects'].map((item) => (
                       <li key={item}>
                         <button onClick={() => scrollToSection(item.toLowerCase())} className="footer-link">{item}</button>
                       </li>
@@ -725,7 +585,9 @@ export default function Portfolio() {
             
             <div className="footer-bottom">
               <p>© {new Date().getFullYear()} Mechelle Joe Anand. All rights reserved.</p>
-              <p className='footer-bottom-tech'>Built with Next.js •  {theme === 'dark' ? <Moon size={15} /> : <Sun size={15} />} {theme} mode</p>
+              <p className='footer-bottom-tech'>
+                Built with Next.js • <span className="footer-theme-indicator">{theme === 'dark' ? <Moon size={15} /> : <Sun size={15} />} {theme} mode</span>
+              </p>
             </div>
           </div>
         </footer>
