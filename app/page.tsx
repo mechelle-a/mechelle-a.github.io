@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Github, Linkedin, Mail, ExternalLink, Menu, X, Moon, Sun } from 'lucide-react';
+import { Github, Linkedin, Mail, ExternalLink, Menu, X, Moon, Sun, Download } from 'lucide-react';
 import './portfolio.css';
 
 // ==================== CONSTANTS ====================
@@ -20,6 +20,7 @@ const PROJECTS_DATA = [
     description: 'TaskFlow is a responsive task management web application built with React.js, allowing users to organize tasks with color-coded labels and persistent local storage.',
     tech: ['React.js', 'JavaScript', 'CSS', 'Browser Local Storage', 'React Hooks'],
     link: 'https://taskflow2-taskmanager.netlify.app/',
+    screenshots: ['/taskflow-screenshot.png', '/taskflow-dashboard.png'],
     extendedInfo: 'Features include drag-and-drop task prioritization, category filtering, and a clean, intuitive interface designed for productivity. The app demonstrates proficiency in React state management and modern web development practices.'
   }
 ] as const;
@@ -58,9 +59,8 @@ const SectionTransition = React.memo(({ variant = 'light' }: { variant?: 'light'
       )}
       <div className="transition-gradient-overlay" />
       
-      {/* Floating circles */}
       <div className="transition-floating-elements">
-        {[...Array(20)].map((_, i) => (
+        {[...Array(40)].map((_, i) => (
           <div key={`transition-dot-${i}`} className={`floating-dot floating-dot-${i + 1}`}></div>
         ))}
       </div>
@@ -135,29 +135,40 @@ const useCustomCursor = () => {
   const [isHovering, setIsHovering] = useState(false);
 
   useEffect(() => {
-    const hideCursor = () => {
+    // UPDATED: Hide cursor immediately on mount - don't wait for mouse move
+    const hideCursorImmediately = () => {
       document.body.style.cursor = 'none';
       document.documentElement.style.cursor = 'none';
-      // Hide cursor on all elements with multiple approaches
+      document.body.classList.add('custom-cursor-active');
+      document.documentElement.classList.add('custom-cursor-active');
+      
+      // Remove existing style tag if present
+      const existingStyle = document.getElementById('custom-cursor-override');
+      if (existingStyle) {
+        existingStyle.remove();
+      }
+      
+      // Inject global cursor override styles
       const styleSheet = document.createElement('style');
       styleSheet.id = 'custom-cursor-override';
       styleSheet.textContent = `
         *, *::before, *::after, 
-        html, body, div, span, button, a, input, textarea, select {
+        html, body, div, span, button, a, input, textarea, select,
+        [role="button"], [onclick], label {
           cursor: none !important;
         }
-        body {
+        body, html {
           cursor: none !important;
         }
       `;
-      document.head.appendChild(styleSheet);
-      
-      // Force cursor property on body and html
-      document.body.classList.add('custom-cursor-active');
-      document.documentElement.classList.add('custom-cursor-active');
+      document.head.insertBefore(styleSheet, document.head.firstChild);
     };
     
-    hideCursor();
+    // CRITICAL FIX: Call immediately on mount
+    hideCursorImmediately();
+    
+    // Also hide on visibility change (when user returns to tab)
+    document.addEventListener('visibilitychange', hideCursorImmediately);
     
     let rafId: number;
     let currentX = 0;
@@ -173,21 +184,24 @@ const useCustomCursor = () => {
           rafId = 0;
         });
       }
-      hideCursor();
+      hideCursorImmediately();
     };
 
     const handleMouseOver = (e: MouseEvent) => {
-      hideCursor();
+      hideCursorImmediately();
       const target = e.target as HTMLElement;
       setIsHovering(!!(target.closest('button') || target.closest('a')));
     };
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     window.addEventListener('mouseover', handleMouseOver, { passive: true });
+    document.addEventListener('mouseenter', hideCursorImmediately);
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseover', handleMouseOver);
+      document.removeEventListener('mouseenter', hideCursorImmediately);
+      document.removeEventListener('visibilitychange', hideCursorImmediately);
       if (rafId) cancelAnimationFrame(rafId);
     };
   }, []);
@@ -204,7 +218,6 @@ const useTheme = () => {
       setTheme(savedTheme);
       document.documentElement.setAttribute('data-theme', savedTheme);
     } else {
-      // Set dark as default
       document.documentElement.setAttribute('data-theme', 'dark');
       localStorage.setItem('portfolio-theme', 'dark');
     }
@@ -278,7 +291,7 @@ export default function Portfolio() {
     }
     const element = document.getElementById(id);
     if (element) {
-      const navHeight = 80; // Height of fixed navigation
+      const navHeight = 80;
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - navHeight;
       
@@ -294,6 +307,16 @@ export default function Portfolio() {
     if (window.confirm(`You are about to leave this site and visit ${linkName}. Continue?`)) {
       window.open(url, '_blank', 'noopener,noreferrer');
     }
+  }, []);
+
+  const handleDownloadResume = useCallback(() => {
+    const resumeUrl = '/resume.pdf';
+    const link = document.createElement('a');
+    link.href = resumeUrl;
+    link.download = 'Mechelle_Joe_Anand_Resume.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }, []);
 
   const getTransform = useCallback((delay: number) => {
@@ -370,14 +393,11 @@ export default function Portfolio() {
             <div className="hero-orb hero-orb-1"></div>
             <div className="hero-orb hero-orb-2"></div>
             
-            {/* Floating Elements */}
             <div className="hero-floating-elements">
-              {/* Snowflake-like floating dots */}
-              {[...Array(20)].map((_, i) => (
+              {[...Array(40)].map((_, i) => (
                 <div key={`dot-${i}`} className={`floating-dot floating-dot-${i + 1}`}></div>
               ))}
               
-              {/* NEW: Geometric shapes */}
               {[...Array(8)].map((_, i) => (
                 <div key={`shape-${i}`} className={`floating-shape floating-shape-${i + 1}`}></div>
               ))}
@@ -498,10 +518,29 @@ export default function Portfolio() {
                 >
                   <div className="project-header">
                     <h3 className="project-title">{project.title}</h3>
-                    <button onClick={() => handleExternalLink(project.link, project.title)} className="project-link">
-                      View Project<ExternalLink size={16} className="project-link-icon" />
-                    </button>
+                    <div className="project-header-buttons">
+                      <button onClick={() => handleExternalLink(project.link, project.title)} className="project-link">
+                        View Project<ExternalLink size={16} className="project-link-icon" />
+                      </button>
+                    </div>
                   </div>
+                  
+                  {/* Screenshots appear on hover */}
+                  {project.screenshots && expandedProject === index && (
+                    <div className="project-screenshots-grid">
+                      {project.screenshots.map((screenshot, imgIndex) => (
+                        <div key={imgIndex} className="project-screenshot-container">
+                          <img 
+                            src={screenshot} 
+                            alt={`${project.title} screenshot ${imgIndex + 1}`} 
+                            className="project-screenshot"
+                            loading="eager"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
                   <p className="project-description">{project.description}</p>
                   
                   <div className={`project-extended-info ${expandedProject === index ? 'visible' : ''}`}>
@@ -524,14 +563,11 @@ export default function Portfolio() {
           <div className="footer-orb footer-orb-1"></div>
           <div className="footer-orb footer-orb-2"></div>
           
-          {/* Floating Elements - Same as Hero */}
           <div className="footer-floating-elements">
-            {/* Snowflake-like floating dots */}
-            {[...Array(20)].map((_, i) => (
+            {[...Array(40)].map((_, i) => (
               <div key={`footer-dot-${i}`} className={`floating-dot floating-dot-${i + 1}`}></div>
             ))}
             
-            {/* Geometric shapes */}
             {[...Array(8)].map((_, i) => (
               <div key={`footer-shape-${i}`} className={`floating-shape floating-shape-${i + 1}`}></div>
             ))}
@@ -568,6 +604,12 @@ export default function Portfolio() {
                     </li>
                     <li>
                       <button className="footer-link" style={{ cursor: 'default' }}>Hamilton, ON</button>
+                    </li>
+                    <li>
+                      <button onClick={handleDownloadResume} className="footer-link footer-resume-link">
+                        <Download size={16} />
+                        <span>Download Resume</span>
+                      </button>
                     </li>
                   </ul>
                 </nav>
