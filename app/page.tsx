@@ -603,14 +603,9 @@ export default function Portfolio() {
                       </button>
                     </li>
                     <li>
-                      <button className="footer-link" style={{ cursor: 'default' }}>Hamilton, ON</button>
+                      <p className="footer-link" style={{ cursor: 'default' }}>Hamilton, ON</p>
                     </li>
-                    <li>
-                      <button onClick={handleDownloadResume} className="footer-link footer-resume-link">
-                        <Download size={16} />
-                        <span>Download Resume</span>
-                      </button>
-                    </li>
+              
                   </ul>
                 </nav>
               </div>

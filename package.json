@@ -1,9 +1,12 @@
 {
+  "homepage" : "http://mechelle-a.github.io/mechelle-a.github.io",
   "name": "my-portfolio",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d out",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
