@@ -800,7 +800,7 @@ body {
 [data-theme="dark"] .hero-button {
   background: linear-gradient(to right, #C4BDB9, #A89F91);
   border: solid 2px #8B7A75;
-  color: #8B7A75;
+  color: #644f49;
 }
 
 .hero-button:hover {
@@ -1869,6 +1869,18 @@ body {
   text-underline-offset: 3px;
 }
 
+.footer-addy-link{
+  color: var(--color-indigo-600);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+
+}
+
 [data-theme="dark"] .footer-link {
   color: #8B7A75;
   text-decoration-color: #8B7A75;
@@ -2130,3 +2142,5 @@ body {
     filter: blur(0px) brightness(1);
   }
 }
+
+

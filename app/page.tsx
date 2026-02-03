@@ -78,12 +78,29 @@ const CustomCursor = React.memo(({ x, y, isHovering }: { x: number; y: number; i
       style={{
         left: `${x}px`,
         top: `${y}px`,
-        transform: isHovering ? 'translate(-50%, -50%) scale(1.2)' : 'translate(-50%, -50%) scale(1)',
+        transform: isHovering ? 'translate(-50%, -50%) scale(1.8)' : 'translate(-50%, -50%) scale(1)',
       }}
     >
       <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-        <path d="M5 5L12.57 23.47L15.29 15.29L23.47 12.57L5 5Z" fill="none" stroke="#A89F91" strokeWidth="4.5" strokeLinejoin="round" strokeLinecap="round" />
-        <path d="M5 5L12.57 23.47L15.29 15.29L23.47 12.57L5 5Z" fill="#7A1E35" stroke="#932841" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" />
+        {isHovering ? (
+          // Filled arrow for hover state - more prominent
+          <>
+            <path d="M5 5L12.57 23.47L15.29 15.29L23.47 12.57L5 5Z" 
+                  fill="#7A1E35" 
+                  stroke="#932841" 
+                  strokeWidth="2" 
+                  strokeLinejoin="round" 
+                  strokeLinecap="round" 
+            />
+            <circle cx="16" cy="16" r="2" fill="#932841" opacity="0.6" />
+          </>
+        ) : (
+          // Regular arrow
+          <>
+            <path d="M5 5L12.57 23.47L15.29 15.29L23.47 12.57L5 5Z" fill="none" stroke="#A89F91" strokeWidth="4.5" strokeLinejoin="round" strokeLinecap="round" />
+            <path d="M5 5L12.57 23.47L15.29 15.29L23.47 12.57L5 5Z" fill="#7A1E35" stroke="#932841" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" />
+          </>
+        )}
       </svg>
     </div>
   </>
@@ -135,7 +152,7 @@ const useCustomCursor = () => {
   const [isHovering, setIsHovering] = useState(false);
 
   useEffect(() => {
-    // UPDATED: Hide cursor immediately on mount - don't wait for mouse move
+    // Hide cursor immediately on mount - don't wait for mouse move
     const hideCursorImmediately = () => {
       document.body.style.cursor = 'none';
       document.documentElement.style.cursor = 'none';
@@ -164,7 +181,7 @@ const useCustomCursor = () => {
       document.head.insertBefore(styleSheet, document.head.firstChild);
     };
     
-    // CRITICAL FIX: Call immediately on mount
+    // Call immediately on mount
     hideCursorImmediately();
     
     // Also hide on visibility change (when user returns to tab)
@@ -190,16 +207,62 @@ const useCustomCursor = () => {
     const handleMouseOver = (e: MouseEvent) => {
       hideCursorImmediately();
       const target = e.target as HTMLElement;
-      setIsHovering(!!(target.closest('button') || target.closest('a')));
+      // Check for interactive elements including elements with click handlers
+      const isInteractive = !!(
+        target.closest('button') || 
+        target.closest('a') || 
+        target.closest('[role="button"]') ||
+        target.closest('[onclick]') ||
+        target.closest('.nav-link') ||
+        target.closest('.hero-button') ||
+        target.closest('.social-link') ||
+        target.closest('.project-link') ||
+        target.closest('.education-link') ||
+        target.closest('.footer-link') ||
+        target.closest('.more-link') ||
+        target.closest('.theme-toggle') ||
+        target.closest('.nav-logo') ||
+        target.closest('.nav-mobile-link') ||
+        target.closest('.project-card') ||
+        target.closest('.hero-button-secondary')
+      );
+      setIsHovering(isInteractive);
+    };
+
+    const handleMouseOut = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const isLeavingInteractive = !!(
+        target.closest('button') || 
+        target.closest('a') || 
+        target.closest('[role="button"]') ||
+        target.closest('[onclick]') ||
+        target.closest('.nav-link') ||
+        target.closest('.hero-button') ||
+        target.closest('.social-link') ||
+        target.closest('.project-link') ||
+        target.closest('.education-link') ||
+        target.closest('.footer-link') ||
+        target.closest('.more-link') ||
+        target.closest('.theme-toggle') ||
+        target.closest('.nav-logo') ||
+        target.closest('.nav-mobile-link') ||
+        target.closest('.project-card') ||
+        target.closest('.hero-button-secondary')
+      );
+      if (isLeavingInteractive) {
+        setIsHovering(false);
+      }
     };
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     window.addEventListener('mouseover', handleMouseOver, { passive: true });
+    window.addEventListener('mouseout', handleMouseOut, { passive: true });
     document.addEventListener('mouseenter', hideCursorImmediately);
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseover', handleMouseOver);
+      window.removeEventListener('mouseout', handleMouseOut);
       document.removeEventListener('mouseenter', hideCursorImmediately);
       document.removeEventListener('visibilitychange', hideCursorImmediately);
       if (rafId) cancelAnimationFrame(rafId);
@@ -603,7 +666,7 @@ export default function Portfolio() {
                       </button>
                     </li>
                     <li>
-                      <p className="footer-link" style={{ cursor: 'default' }}>Hamilton, ON</p>
+                      <p className="footer-addy-link" style={{ cursor: 'default' }}>Hamilton, ON</p>
                     </li>
               
                   </ul>
